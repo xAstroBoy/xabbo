@@ -1,13 +1,14 @@
 ﻿using Xabbo.Messages;
-using Xabbo.Messages.Flash;
+
 using Xabbo.Core;
 using Xabbo.Core.Game;
 using Xabbo.Core.Messages.Outgoing;
 using System.Reactive.Linq;
+using Xabbo.Messages.Nitro;
 
 namespace Xabbo.Command.Modules;
 
-[CommandModule(SupportedClients = ClientType.Modern)]
+[CommandModule]
 public sealed class FindFriendCommand(FriendManager friendManager) : CommandModule
 {
     private readonly SemaphoreSlim _waiting = new(5);
@@ -49,11 +50,11 @@ public sealed class FindFriendCommand(FriendManager friendManager) : CommandModu
             var throttleInterval = Task.Delay(5500);
             try
             {
-                Task<IPacket> receiver = Ext.ReceiveAsync([In.RoomForward, In.FollowFriendFailed], 2000, true);
-                Ext.Send(Out.FollowFriend, friend.Id);
+                Task<IPacket> receiver = Ext.ReceiveAsync([In.Room_Forward, In.Messenger_Follow_Failed], 2000, true);
+                Ext.Send(Out.Follow_Friend, friend.Id);
                 var packet = await receiver;
 
-                if (Ext.Messages.Is(packet.Header, In.RoomForward))
+                if (packet.Header.Is(In.Room_Forward))
                 {
                     int roomId = packet.Read<int>();
                     var roomData = await Ext.RequestAsync(new GetRoomDataMsg(roomId));

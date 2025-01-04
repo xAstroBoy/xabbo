@@ -1,4 +1,4 @@
-using ReactiveUI;
+﻿using ReactiveUI;
 using Xabbo.Configuration;
 
 using Xabbo.Core;
@@ -14,7 +14,7 @@ namespace Xabbo.Controllers;
 public partial class RoomModerationController : ControllerBase
 {
     public enum ModerationType { None, Mute, Unmute, Kick, Ban, Unban, Bounce }
-    delegate Task ModerateUserCallback(IUser user, Id roomId, CancellationToken cancellationToken);
+    delegate Task ModerateUserCallback(IUser user, int roomId, CancellationToken cancellationToken);
 
     private readonly IConfigProvider<AppConfig> _config;
     private readonly IOperationManager _operationManager;
@@ -23,10 +23,7 @@ public partial class RoomModerationController : ControllerBase
     private readonly SemaphoreSlim _workingSemaphore = new(1, 1);
     private CancellationTokenSource? _cts;
 
-    private TimingConfigBase GetTiming() => Session.Is(ClientType.Origins)
-        ? _config.Value.Timing.Origins
-        : _config.Value.Timing.Modern;
-
+    private TimingConfigBase GetTiming() => _config.Value.Timing.Modern;
     [Reactive] public ModerationType CurrentOperation { get; set; }
     [Reactive] public int CurrentProgress { get; set; }
     [Reactive] public int TotalProgress { get; set; }
@@ -111,7 +108,7 @@ public partial class RoomModerationController : ControllerBase
         RefreshPermissions();
     }
 
-    private Task MuteUserAsync(IUser user, Id roomId, int minutes)
+    private Task MuteUserAsync(IUser user, int roomId, int minutes)
     {
         Send(new MuteUserMsg(user.Id, roomId, minutes));
         return Task.CompletedTask;
@@ -123,19 +120,19 @@ public partial class RoomModerationController : ControllerBase
         return Task.CompletedTask;
     }
 
-    private Task BanUserAsync(IUser user, Id roomId, BanDuration duration)
+    private Task BanUserAsync(IUser user, int roomId, BanDuration duration)
     {
         Send(new BanUserMsg(user.Id, user.Name, roomId, duration));
         return Task.CompletedTask;
     }
 
-    private Task UnbanUserAsync(IUser user, Id roomId)
+    private Task UnbanUserAsync(IUser user, int roomId)
     {
         Send(new UnbanUserMsg(user.Id, roomId));
         return Task.CompletedTask;
     }
 
-    private async Task BounceUserAsync(IUser user, Id roomId, CancellationToken cancellationToken)
+    private async Task BounceUserAsync(IUser user, int roomId, CancellationToken cancellationToken)
     {
         Send(new BanUserMsg(user, roomId, BanDuration.Hour));
         await Task.Delay(_config.Value.Timing.Modern.BounceUnbanDelay, cancellationToken);

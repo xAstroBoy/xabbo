@@ -1,4 +1,4 @@
-using System.Reactive;
+﻿using System.Reactive;
 using ReactiveUI;
 using Xabbo.Models;
 
@@ -10,8 +10,6 @@ public sealed class OutfitViewModel : ViewModelBase
 
     public string Gender => Model.Gender;
     public string Figure => Model.FigureString;
-    public bool IsOrigins => Model.IsOrigins;
-
     [Reactive] public int Direction { get; set; } = 2;
     [Reactive] public string? ModernFigure { get; set; }
 
@@ -21,8 +19,8 @@ public sealed class OutfitViewModel : ViewModelBase
     {
         Model = model;
 
-        if (!Model.IsOrigins)
-            ModernFigure = Model.FigureString;
+        ModernFigure = Model.FigureString;
+
 
         RotateCmd = ReactiveCommand.Create<int>(Rotate);
     }

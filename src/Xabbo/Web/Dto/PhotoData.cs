@@ -14,7 +14,7 @@ public class PhotoData
     public string Type { get; set; } = string.Empty;
 
     [JsonPropertyName("time")]
-    public long Time { get; set; }
+    public int Time { get; set; }
 
     [JsonPropertyName("tags")]
     public List<string> Tags { get; set; } = new();

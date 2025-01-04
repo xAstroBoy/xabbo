@@ -15,5 +15,5 @@ namespace Xabbo.Serialization;
 [JsonSerializable(typeof(FigureModel))]
 [JsonSerializable(typeof(List<FigureModel>))]
 [JsonSerializable(typeof(IEnumerable<FigureModel>))]
-[JsonSerializable(typeof(Dictionary<long, string>))]
+[JsonSerializable(typeof(Dictionary<int, string>))]
 public partial class JsonSourceGenerationContext : JsonSerializerContext;

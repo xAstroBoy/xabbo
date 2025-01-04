@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -45,24 +45,19 @@ public class FigureConverterService : IFigureConverterService
 
     private async Task InitializeFigureConverter()
     {
-        if (!_gameState.Session.Is(ClientType.Origins))
+        if (!_gameState.Session.Is(ClientType.Nitro))
             return;
 
         try
         {
-            if (_gameState.GameData.Figure is not { } originsFigureData)
-                throw new Exception("Origins figure data is not loaded.");
-
             Log.LogDebug("Loading modern figure data...");
             GameDataManager modernGameData = new(null, _loggerFactory) { AutoInitCoreExtensions = false };
-            await modernGameData.LoadAsync(Hotel.FromIdentifier("us"), [GameDataType.FigureData]);
+            await modernGameData.LoadAsync(Hotel.FromIdentifier("bss"), [GameDataType.FigureData]);
 
             if (modernGameData is not { } modernFigureData)
                 throw new Exception("Failed to load modern figure data.");
 
-            figureConverter = new FigureConverter(
-                modernGameData.Figure!,
-                _gameState.GameData.Figure!);
+            figureConverter = new FigureConverter(modernGameData.Figure!);
 
             Log.LogInformation("Initialized figure converter.");
 

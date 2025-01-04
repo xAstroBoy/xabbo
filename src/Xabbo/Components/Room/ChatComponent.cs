@@ -1,4 +1,4 @@
-﻿using Xabbo.Messages.Flash;
+﻿
 using Xabbo.Extension;
 using Xabbo.Core;
 using Xabbo.Core.Game;
@@ -6,6 +6,7 @@ using Xabbo.Core.Events;
 using Xabbo.Services.Abstractions;
 using Xabbo.Configuration;
 using Xabbo.Core.GameData;
+using Xabbo.Messages.Nitro;
 
 namespace Xabbo.Components;
 
@@ -109,15 +110,13 @@ public partial class ChatComponent : Component
         }
     }
 
-    [Intercept(ClientType.Modern)]
-    [InterceptIn(nameof(In.RespectNotification))]
+    [InterceptIn(nameof(In.Pet_Respected))]
     private void OnUserRespect(Intercept e)
     {
         if (Settings.Chat.MuteRespects) e.Block();
     }
 
-    [Intercept(ClientType.Modern)]
-    [InterceptIn(nameof(In.PetRespectNotification))]
+    [InterceptIn(nameof(In.Pet_Respected))]
     private void OnRoomPetRespect(Intercept e)
     {
         if (Settings.Chat.MuteScratches) e.Block();

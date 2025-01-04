@@ -1,11 +1,13 @@
-﻿using Xabbo.Messages.Flash;
+﻿
 using Xabbo.Core;
 using Xabbo.Core.Game;
 using Xabbo.Core.Tasks;
 using Xabbo.Core.Messages.Outgoing;
 using Humanizer;
+using Xabbo.Messages;
+using In = Xabbo.Messages.Nitro.In;
+using Out = Xabbo.Messages.Nitro.Out;
 
-using In = Xabbo.Messages.Flash.In;
 
 namespace Xabbo.Command.Modules;
 
@@ -14,26 +16,26 @@ public sealed class RoomCommands(RoomManager roomManager) : CommandModule
 {
     private readonly RoomManager _roomMgr = roomManager;
 
-    [Command("clear", SupportedClients = ClientType.Modern)]
-    public Task ClearCommandHandler(CommandArgs _)
-    {
-        if (_roomMgr.EnsureInRoom(out var room))
-            Ext.Send(In.RoomEntryInfo, room.Id, _roomMgr.IsOwner);
-        return Task.CompletedTask;
-    }
+    //[Command("clear", SupportedClients = ClientType.Nitro)]
+    //public Task ClearCommandHandler(CommandArgs _)
+    //{
+    //    if (_roomMgr.EnsureInRoom(out var room))
+    //        Ext.Send(In.RoomEntryInfo, room.Id, _roomMgr.IsOwner);
+    //    return Task.CompletedTask;
+    //}
 
-    [Command("refresh", SupportedClients = ClientType.Modern)]
-    public Task RefreshCommandHandler(CommandArgs _)
-    {
-        if (_roomMgr.IsInRoom)
-            Ext.Send(Out.GetHeightMap);
-        return Task.CompletedTask;
-    }
+    //[Command("refresh", SupportedClients = ClientType.Nitro)]
+    //public Task RefreshCommandHandler(CommandArgs _)
+    //{
+    //    if (_roomMgr.IsInRoom)
+    //        Ext.Send(Out.room);
+    //    return Task.CompletedTask;
+    //}
 
     [Command("goto")]
     public Task GotoCommandHandler(CommandArgs args)
     {
-        if (args.Length >= 1 && Id.TryParse(args[0], out Id roomId))
+        if (args.Length >= 1 && int.TryParse(args[0], out int roomId))
         {
             string password = "";
             if (args.Length >= 2)
@@ -52,7 +54,7 @@ public sealed class RoomCommands(RoomManager roomManager) : CommandModule
     [Command("exit")]
     public Task ExitCommandHandler(CommandArgs args)
     {
-        Ext.Send(Out.Quit);
+        Ext.Send(Out.Hotel_View);
         return Task.CompletedTask;
     }
 
@@ -61,10 +63,7 @@ public sealed class RoomCommands(RoomManager roomManager) : CommandModule
     {
         if (_roomMgr.EnsureInRoom(out var room))
         {
-            if (Session.Is(ClientType.Modern))
-                Ext.Send(In.RoomForward, room.Id);
-            else
-                Ext.Send(Out.OpenFlatConnection, room.Id, "", (Id)(-1));
+            Ext.Send(Out.Room_Enter, room.Id, "", -1);
         }
 
         return Task.CompletedTask;
@@ -88,20 +87,20 @@ public sealed class RoomCommands(RoomManager roomManager) : CommandModule
         update(settings);
 
         var receiver = Ext.ReceiveAsync(
-            [In.RoomSettingsSaved, In.RoomSettingsSaveError],
+            [In.Room_Settings_Save, In.Room_Settings_Save_Error],
             timeout: 2000,
             block: true
         );
-        Ext.Send(Out.SaveRoomSettings, settings);
+        Ext.Send(Out.Room_Settings_Save, settings);
 
         var packet = await receiver;
-        if (Ext.Messages.Is(packet.Header, In.RoomSettingsSaveError))
+        if (packet.Header.Is(In.Room_Settings_Save_Error))
             throw new Exception("Server responded with an error when attempting to update room settings.");
 
         return true;
     }
 
-    [Command("lock", SupportedClients = ClientType.Flash)]
+    [Command("lock", SupportedClients = ClientType.Nitro)]
     public async Task LockRoomAsync(CommandArgs args)
     {
         string? password = null;
@@ -127,14 +126,14 @@ public sealed class RoomCommands(RoomManager roomManager) : CommandModule
         }
     }
 
-    [Command("open", SupportedClients = ClientType.Flash)]
+    [Command("open", SupportedClients = ClientType.Nitro)]
     public async Task OpenRoomAsync(CommandArgs _)
     {
         if (await UpdateRoomSettingsAsync(s => s.Access = RoomAccess.Open))
             ShowMessage("Room has been opened.");
     }
 
-    [Command("trading", SupportedClients = ClientType.Flash)]
+    [Command("trading", SupportedClients = ClientType.Nitro)]
     public async Task SetTradingAsync(CommandArgs args)
     {
         if (args is [ "on" or "off" or "rights", .. ])
@@ -153,7 +152,7 @@ public sealed class RoomCommands(RoomManager roomManager) : CommandModule
         }
     }
 
-    [Command("access", "ra", Usage = "<open/hide/lock> [password]", SupportedClients = ClientType.Flash)]
+    [Command("access", "ra", Usage = "<open/hide/lock> [password]", SupportedClients = ClientType.Nitro)]
     public async Task SetRoomAccessAsync(CommandArgs args)
     {
         if (args.Length < 1)

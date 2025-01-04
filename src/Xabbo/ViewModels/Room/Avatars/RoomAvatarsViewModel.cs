@@ -325,7 +325,7 @@ public class RoomAvatarsViewModel : ViewModelBase
 
     private void UpdateOriginsFigure(AvatarViewModel vm)
     {
-        if (vm.Type is AvatarType.User && vm.IsOrigins &&
+        if (vm.Type is AvatarType.User && 
             _figureConverter.TryConvertToModern(vm.Avatar.Figure, out Figure? figure))
         {
             vm.ModernFigure = figure.ToString();
@@ -334,11 +334,9 @@ public class RoomAvatarsViewModel : ViewModelBase
 
     private void OnFigureConverterAvailable()
     {
-        if (_ext.Session.Is(ClientType.Origins))
-        {
-            foreach (var (_, vm) in _avatarCache.KeyValues)
-                UpdateOriginsFigure(vm);
-        }
+        return;
+        foreach (var (_, vm) in _avatarCache.KeyValues)
+            UpdateOriginsFigure(vm);
     }
 
     private void CopyAvatarsToWardrobe()
@@ -499,10 +497,10 @@ public class RoomAvatarsViewModel : ViewModelBase
         _uiContext.Invoke(() => {
             foreach (var avatar in e.Avatars)
             {
-                var vm = new AvatarViewModel(avatar) { IsOrigins = _ext.Session.Is(ClientType.Origins) };
+                var vm = new AvatarViewModel(avatar);
                 if (avatar is User user)
                 {
-                    if (_roomManager.Room?.Data is { OwnerId: Id ownerId, OwnerName: string ownerName })
+                    if (_roomManager.Room?.Data is { OwnerId: int ownerId, OwnerName: string ownerName })
                     {
                         if (ownerId > 0)
                         {
@@ -515,10 +513,7 @@ public class RoomAvatarsViewModel : ViewModelBase
                         }
                     }
                     vm.IsStaff = user.IsStaff;
-                    if (_ext.Session.Is(ClientType.Modern))
-                        vm.ModernFigure = avatar.Figure;
-                    else
-                        UpdateOriginsFigure(vm);
+                    vm.ModernFigure = avatar.Figure;
                 }
 
                 _avatarCache.AddOrUpdate(vm);

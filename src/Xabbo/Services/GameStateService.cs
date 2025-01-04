@@ -59,7 +59,7 @@ public class GameStateService : ReactiveObject, IGameStateService
 
         try
         {
-            var hotel = Hotel.FromGameHost(e.Host);
+            var hotel = Hotel.FromIdentifier("bss");
             await GameData.LoadAsync(hotel);
         }
         catch (Exception ex)

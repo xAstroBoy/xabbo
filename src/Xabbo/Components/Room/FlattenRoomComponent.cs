@@ -1,13 +1,13 @@
 ﻿using Xabbo.Messages;
-using Xabbo.Messages.Flash;
+
 using Xabbo.Extension;
 using Xabbo.Core;
 using Xabbo.Core.Game;
 using Xabbo.Core.Messages.Incoming;
+using Xabbo.Messages.Nitro;
 
 namespace Xabbo.Components;
 
-[Intercept(~ClientType.Shockwave)]
 public partial class FlattenRoomComponent(IExtension extension, RoomManager roomManager) : Component(extension)
 {
     private readonly RoomManager _roomManager = roomManager;
@@ -57,7 +57,7 @@ public partial class FlattenRoomComponent(IExtension extension, RoomManager room
             return tile;
     }
 
-    [InterceptIn("f:"+nameof(In.HeightMap))]
+    [InterceptIn(nameof(In.Room_Height_Map))]
     private void HandleHeightMap(Intercept e)
     {
         if (!_isActivated) return;
@@ -69,43 +69,43 @@ public partial class FlattenRoomComponent(IExtension extension, RoomManager room
         _heightmap = e.Packet.Read<Heightmap>();
     }
 
-    [InterceptIn(nameof(In.FloorHeightMap))]
-    private void HandleFloorHeightMap(Intercept e)
-    {
-        if (!_isActivated || _heightmap is null) return;
+    //[InterceptIn(nameof(In.FloorHeightMap))]
+    //private void HandleFloorHeightMap(Intercept e)
+    //{
+    //    if (!_isActivated || _heightmap is null) return;
 
-        e.Block();
+    //    e.Block();
 
-        _originalFloorPlan = e.Packet.Read<FloorPlan>();
+    //    _originalFloorPlan = e.Packet.Read<FloorPlan>();
 
-        e.Packet.Position = 0;
-        FloorPlan floorPlan = e.Packet.Read<FloorPlan>();
-        for (int y = 0; y < floorPlan.Size.Y; y++)
-            for (int x = 0; x < floorPlan.Size.X; x++)
-                if (floorPlan.GetHeight(x, y) >= 0)
-                    floorPlan.SetHeight(x, y, 0);
+    //    e.Packet.Position = 0;
+    //    FloorPlan floorPlan = e.Packet.Read<FloorPlan>();
+    //    for (int y = 0; y < floorPlan.Size.Y; y++)
+    //        for (int x = 0; x < floorPlan.Size.X; x++)
+    //            if (floorPlan.GetHeight(x, y) >= 0)
+    //                floorPlan.SetHeight(x, y, 0);
 
-        e.Packet.ReplaceAt(5, floorPlan.ToString());
+    //    e.Packet.ReplaceAt(5, floorPlan.ToString());
 
-        // Modify the heightmap
-        for (int y = 0; y < _heightmap.Size.Y; y++)
-        {
-            for (int x = 0; x < _heightmap.Size.X; x++)
-            {
-                if (_heightmap[x, y].IsFree)
-                {
-                    float height = _heightmap[x, y].Height - GetOffset(x, y);
-                    if (height >= 0)
-                        _heightmap[x, y].Height = height;
-                }
-            }
-        }
+    //    // Modify the heightmap
+    //    for (int y = 0; y < _heightmap.Size.Y; y++)
+    //    {
+    //        for (int x = 0; x < _heightmap.Size.X; x++)
+    //        {
+    //            if (_heightmap[x, y].IsFree)
+    //            {
+    //                float height = _heightmap[x, y].Height - GetOffset(x, y);
+    //                if (height >= 0)
+    //                    _heightmap[x, y].Height = height;
+    //            }
+    //        }
+    //    }
 
-        Ext.Send(In.HeightMap, _heightmap);
-        Ext.Send(e.Packet);
-    }
+    //    Ext.Send(In.HeightMap, _heightmap);
+    //    Ext.Send(e.Packet);
+    //}
 
-    [InterceptIn(nameof(In.HeightMapUpdate))]
+    [InterceptIn(nameof(In.Room_Height_Map_Update))]
     private void HandleHeightMapUpdate(Intercept e)
     {
         if (!_isActivated) return;
@@ -168,7 +168,7 @@ public partial class FlattenRoomComponent(IExtension extension, RoomManager room
         e.Packet.Write(updates);
     }
 
-    [InterceptIn("f:"+nameof(In.Objects))]
+    [InterceptIn(nameof(In.Floor_Furni_List))]
     private void HandleObjects(Intercept e)
     {
         if (!_isActivated) return;
@@ -191,7 +191,7 @@ public partial class FlattenRoomComponent(IExtension extension, RoomManager room
         e.Packet.Write(msg);
     }
 
-    [InterceptIn(nameof(In.ObjectUpdate))]
+    [InterceptIn(nameof(In.Floor_Update))]
     private void HandleObjectUpdate(Intercept e)
     {
         if (!_isActivated) return;

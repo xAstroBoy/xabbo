@@ -56,7 +56,7 @@ public sealed class FurniCommands(
             return;
         }
 
-        if (Session.Is(ClientType.Origins) && !_roomManager.IsOwner)
+        if (!_roomManager.IsOwner)
         {
             ShowMessage("You must be the room owner to pick up furni.");
             return;
@@ -64,11 +64,8 @@ public sealed class FurniCommands(
 
         Regex regex = StringUtility.CreateWildcardRegex(pattern);
 
-        var allFurni = Session.Is(ClientType.Origins)
-            ? room.Furni.ToArray()
-            : room.Furni.Where(x =>
-                eject == (x.OwnerId != userData.Id)
-            ).ToArray();
+        var allFurni = room.Furni.ToArray();
+            
 
         var matched = matchAll ? allFurni : allFurni.Where(furni =>
             matchAll || (furni.TryGetName(out string? name) && regex.IsMatch(name))
@@ -80,9 +77,7 @@ public sealed class FurniCommands(
             return;
         }
 
-        int pickupInterval = Session.Is(ClientType.Origins)
-            ? _settingsProvider.Value.Timing.Origins.FurniPickupInterval
-            : _settingsProvider.Value.Timing.Modern.FurniPickupInterval;
+        int pickupInterval = _settingsProvider.Value.Timing.Modern.FurniPickupInterval;
 
         int totalDelay = pickupInterval * matched.Length;
         string message = $"Picking up {matched.Length} furni...";

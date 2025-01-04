@@ -34,7 +34,6 @@ public partial class FurniActionsComponent : Component
     [Reactive] public bool PickToFindLink { get; set; }
     [Reactive] public bool CanShowInfo { get; set; }
     [Reactive] public bool PickToShowInfo { get; set; }
-    [Reactive] public bool PickToFetchMarketplaceStats { get; set; }
 
     public FurniActionsComponent(IExtension extension,
         ILoggerFactory loggerFactory,
@@ -56,8 +55,7 @@ public partial class FurniActionsComponent : Component
                 x => x.PickToHide,
                 x => x.PickToShowInfo,
                 x => x.PickToFindLink,
-                x => x.PickToFetchMarketplaceStats,
-                (a1, a2, a3, a4) => a1 || a2 || a3 || a4
+                (a1, a2, a3) => a1 || a2 || a3
             )
             .DistinctUntilChanged()
             .Subscribe(requiresRights => {
@@ -91,7 +89,7 @@ public partial class FurniActionsComponent : Component
     [Intercept]
     private void HandlePick(Intercept e, PickupFurniMsg pick)
     {
-        if (PickToHide || PickToShowInfo || PickToFindLink || PickToFetchMarketplaceStats)
+        if (PickToHide || PickToShowInfo || PickToFindLink)
             e.Block();
 
         IRoom? room = _roomManager.Room;
@@ -137,47 +135,28 @@ public partial class FurniActionsComponent : Component
 
         if (PickToFindLink && furni is IFloorItem floorItem)
         {
-            if (Session.Is(ClientType.Origins))
+            // find link for floor item ( usually the tele are bought together )
+            // find the other tele by finding all furnis with the same type , and add or subtract of 1 from the .id of the current tele to find the other tele, in a list
+            // then find the tele that is not the current tele, and flash it
+            List<IFloorItem> teles = room.FloorItems
+                .Where(x => x.TypeID == floorItem.TypeID)
+                .ToList();
+
+            // find the other tele by getting the tele by adding or subtracting 1 from the current tele id
+            IFloorItem? tele = teles.FirstOrDefault(x => x.Id == floorItem.Id + 1);
+            IFloorItem? tele2 = teles.FirstOrDefault(x => x.Id == floorItem.Id - 1);
+
+            if (tele is not null)
             {
-                // Find and flash teleporters with an adjacent ID.
-                if (furni.Identifier?.Contains("door") == true)
-                {
-                    FlashTele(room.GetFloorItem(furni.Id - 1));
-                    FlashTele(room.GetFloorItem(furni.Id + 1));
-                }
+                FlashTele(tele);
             }
-            else
+            if (tele2 is not null)
             {
-                IFloorItem? linkedItem = room.GetFloorItem(floorItem.Extra);
-                if (linkedItem is not null)
-                {
-                    FlashTele(linkedItem);
-                }
+                FlashTele(tele2);
             }
+
         }
 
-        if (PickToFetchMarketplaceStats)
-        {
-            if (furni.TryGetInfo(out var furniInfo))
-            {
-                Task.Run(async () => {
-                    try
-                    {
-                        var stats = await _api.FetchMarketplaceItemStats(Ext.Session.Hotel, furni.Type, furniInfo.Identifier);
-                        int totalSold = stats.History.Sum(x => x.TotalSoldItems);
-                        _xabbot.ShowMessage(
-                            $"{furniInfo.Name} [{furniInfo.Identifier}]: average {stats.AveragePrice}c / "
-                            + $"{totalSold} sold in the last {stats.HistoryLimitInDays} days",
-                            location
-                        );
-                    }
-                    catch (Exception ex)
-                    {
-                        _xabbot.ShowMessage($"Failed to fetch marketplace stats: {ex.Message}", location);
-                    }
-                });
-            }
-        }
     }
 
     private void FlashTele(IFloorItem? tele)
@@ -185,29 +164,15 @@ public partial class FurniActionsComponent : Component
         if (tele is null)
             return;
 
-        if (Session.Is(ClientType.Origins))
+        Task.Run(async () =>
         {
-            if (tele.Identifier?.Contains("door") != true)
-                return;
-
-            Task.Run(async () => {
-                for (int i = 0; i < 5; i++) {
-                    Ext.Send(Xabbo.Messages.Shockwave.In.DOOR_IN, $"{tele.Id}//");
-                    await Task.Delay(100);
-                }
-            });
-        }
-        else
-        {
-            Task.Run(async () => {
-                Ext.Send(new FloorItemDataUpdatedMsg(tele.Id, new LegacyData { Value = "1" }));
-                Ext.SlideFurni(tele, to: tele.Location + (0, 0, 1), duration: 500);
-                await Task.Delay(1000);
-                Ext.Send(new FloorItemDataUpdatedMsg(tele.Id, new LegacyData { Value = "2" }));
-                await Task.Delay(1000);
-                Ext.SlideFurni(tele, from: tele.Location + (0, 0, 1), duration: 500);
-                Ext.Send(new FloorItemDataUpdatedMsg(tele.Id, new LegacyData { Value = "0" }));
-            });
-        }
+            Ext.Send(new FloorItemDataUpdatedMsg(tele.Id, new LegacyData { Value = "1" }));
+            Ext.SlideFurni(tele, to: tele.Location + (0, 0, 1), duration: 500);
+            await Task.Delay(1000);
+            Ext.Send(new FloorItemDataUpdatedMsg(tele.Id, new LegacyData { Value = "2" }));
+            await Task.Delay(1000);
+            Ext.SlideFurni(tele, from: tele.Location + (0, 0, 1), duration: 500);
+            Ext.Send(new FloorItemDataUpdatedMsg(tele.Id, new LegacyData { Value = "0" }));
+        });
     }
 }

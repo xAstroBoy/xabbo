@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Reactive;
 using System.Reactive.Linq;
 using DynamicData;
@@ -20,7 +20,7 @@ public sealed class RoomGiftsViewModel : ViewModelBase
     private readonly IGameDataManager _gameData;
     private readonly RoomManager _roomManager;
 
-    private readonly SourceCache<GiftViewModel, Id> _cache = new(x => x.Item?.Id ?? 0);
+    private readonly SourceCache<GiftViewModel, long> _cache = new(x => x.Item?.Id ?? 0);
 
     private readonly ReadOnlyObservableCollection<GiftViewModel> _gifts;
     public ReadOnlyObservableCollection<GiftViewModel> Gifts => _gifts;
@@ -140,8 +140,8 @@ public sealed class RoomGiftsViewModel : ViewModelBase
 
                 if (furniInfo is not null)
                 {
-                    gift.ItemIdentifier = furniInfo.Identifier;
-                    gift.ItemImageUrl = UrlHelper.FurniIconUrl(furniInfo.Identifier, furniInfo.Revision);
+                    gift.ItemIdentifier = furniInfo.ClassName;
+                    gift.ItemImageUrl = UrlHelper.FurniIconUrl(furniInfo.ClassName);
                 }
             }
 

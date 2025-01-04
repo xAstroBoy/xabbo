@@ -1,4 +1,4 @@
-using Xabbo.Components;
+﻿using Xabbo.Components;
 using Xabbo.Core;
 using Xabbo.Core.Game;
 using Xabbo.Core.Messages.Outgoing;

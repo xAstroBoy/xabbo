@@ -124,7 +124,7 @@ public partial class CommandManager
                     commandAttribute.CommandName,
                     [.. commandAttribute.Aliases],
                     commandAttribute.Usage,
-                    moduleAttribute.SupportedClients & commandAttribute.SupportedClients & ClientType.All,
+                    moduleAttribute.SupportedClients & commandAttribute.SupportedClients & ClientType.Nitro,
                     handler
                 );
 
@@ -156,7 +156,7 @@ public partial class CommandManager
     }
 
     private void Register(CommandHandler handler, string commandName, string? usage = null,
-        ClientType supportedClients = ClientType.All, params string[] aliases)
+        ClientType supportedClients = ClientType.Nitro, params string[] aliases)
     {
         var binding = new CommandBinding(null, commandName, [.. aliases], usage, supportedClients, handler);
         var commandNames = aliases.Concat([commandName]);

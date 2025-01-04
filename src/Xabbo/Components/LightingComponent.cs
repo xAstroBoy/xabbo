@@ -1,7 +1,7 @@
 ﻿using System.Reactive.Linq;
 using ReactiveUI;
 
-using Xabbo.Messages.Flash;
+
 using Xabbo.Extension;
 using Xabbo.Core;
 using Xabbo.Core.Events;
@@ -9,6 +9,7 @@ using Xabbo.Core.Game;
 using Xabbo.Core.GameData;
 using Xabbo.Models;
 using Xabbo.Core.Messages.Outgoing;
+using Xabbo.Messages.Nitro;
 
 namespace Xabbo.Components;
 
@@ -19,7 +20,7 @@ public class LightingComponent : Component
     private readonly IGameDataManager _gameData;
     private readonly RoomManager _roomManager;
 
-    private Id _currentBgTonerId = -1;
+    private int _currentBgTonerId = -1;
 
     private bool? _lastTonerActiveUpdate;
     private HslU8? _lastTonerColorUpdate;
@@ -89,7 +90,7 @@ public class LightingComponent : Component
         if (_lastTonerColorUpdate.Equals(color)) return;
         if (!Ext.IsConnected || _currentBgTonerId <= 0) return;
         _lastTonerColorUpdate = color;
-        Ext.Send(Out.SetRoomBackgroundColorData, _currentBgTonerId, color);
+        Ext.Send(Out.Room_Toner_Apply, _currentBgTonerId, color);
     }
 
     private void EnableToner(bool enable)

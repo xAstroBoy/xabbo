@@ -1,4 +1,4 @@
-using Xabbo.Core;
+﻿using Xabbo.Core;
 using Xabbo.Core.Messages.Incoming;
 using Xabbo.Extension;
 
@@ -10,17 +10,16 @@ public static class ExtensionUtils
         this IExtension ext,
         IFloorItem item, Tile? from = null, Tile? to = null, int duration = 1000)
     {
-        if (ext.Session.Is(ClientType.Modern))
+        ext.Send(new WiredMovementsMsg
         {
-            ext.Send(new WiredMovementsMsg {
-                new FloorItemWiredMovement {
-                    ItemId = item.Id,
-                    Source = from ?? item.Location,
-                    Destination = to ?? item.Location,
-                    AnimationTime = duration,
-                    Rotation = item.Direction
-                }
-            });
-        }
+            new FloorItemWiredMovement
+            {
+                ItemId = item.Id,
+                Source = from ?? item.Location,
+                Destination = to ?? item.Location,
+                AnimationTime = duration,
+                Rotation = item.Direction
+            }
+        });
     }
 }

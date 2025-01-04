@@ -1,8 +1,8 @@
 ﻿namespace Xabbo.ViewModels;
 
-public class VisitorViewModel(int index, long id, string name) : ViewModelBase
+public class VisitorViewModel(int index, int id, string name) : ViewModelBase
 {
-    public long Id { get; } = id;
+    public int Id { get; } = id;
     public string Name { get; } = name;
 
     [Reactive] public int Index { get; set; } = index;

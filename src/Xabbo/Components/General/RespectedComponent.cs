@@ -1,12 +1,12 @@
-﻿using Xabbo.Messages.Flash;
+﻿
 using Xabbo.Extension;
 using Xabbo.Core;
 using Xabbo.Core.Game;
 using Xabbo.Core.Messages.Incoming;
+using Xabbo.Messages.Nitro;
 
 namespace Xabbo.Components;
 
-[Intercept(~ClientType.Shockwave)]
 public partial class RespectedComponent : Component
 {
     private readonly RoomManager _roomManager;
@@ -58,7 +58,7 @@ public partial class RespectedComponent : Component
         }
     }
 
-    [InterceptIn(nameof(In.RespectNotification))]
+    [InterceptIn(nameof(In.Pet_Respected))]
     private void HandleRespectNotification(Intercept e)
     {
         IRoom? room = _roomManager.Room;

@@ -1,4 +1,4 @@
-using System.Web;
+﻿using System.Web;
 
 namespace Xabbo.Utility;
 
@@ -12,6 +12,7 @@ public static class UrlHelper
         var query = HttpUtility.ParseQueryString("");
         query.Add("direction", direction.ToString());
         query.Add("head_direction", headDirection.Value.ToString());
+        query.Add("size", "l");
         if (headOnly)
             query.Add("headonly", "1");
         if (string.IsNullOrWhiteSpace(figure))
@@ -19,12 +20,14 @@ public static class UrlHelper
         else
             query.Add("figure", figure);
 
-        return $"https://habbo.com/habbo-imaging/avatarimage?{query}";
+        return $"https://images.bsshotel.it/avatar/image?{query}";
     }
 
-    public static string FurniIconUrl(string identifier, int revision)
+    public static string FurniIconUrl(string identifier)
     {
         identifier = identifier.Replace('*', '_');
-        return $"https://images.habbo.com/dcr/hof_furni/{revision}/{identifier}_icon.png";
+        return $"https://images.bsshotel.it/dcr/hof_furni/icons/{identifier}_icon.png";
     }
+
+
 }

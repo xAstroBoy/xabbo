@@ -1,3 +1,4 @@
+﻿using Avalonia;
 using Microsoft.Extensions.Logging;
 using Xabbo.Configuration;
 using Xabbo.Core;
@@ -6,6 +7,7 @@ using Xabbo.Core.Tasks;
 using Xabbo.Exceptions;
 using Xabbo.Extension;
 using Xabbo.Services.Abstractions;
+using Point = Xabbo.Core.Point;
 
 namespace Xabbo.Controllers;
 
@@ -72,11 +74,6 @@ public partial class FurniPlacementController(
                     {
                         var item = floorItems[i];
 
-                        if (!item.TryGetSize(out var size))
-                        {
-                            _logger.LogWarning("Failed to get size for {Item}.", item);
-                            continue;
-                        }
 
                         if (placementFailures >= 3)
                             throw new Exception("Failed to place an item too many times.");
@@ -85,7 +82,7 @@ public partial class FurniPlacementController(
 
                         _logger.LogTrace("Placing item {Current}/{Max}.", Progress, MaxProgress);
 
-                        if (!await PlaceFloorItemAsync(room, floorItemPlacement, item, size, errorHandling, cancellationToken))
+                        if (!await PlaceFloorItemAsync(room, floorItemPlacement, item, item.Size.GetValueOrDefault(new Point(1, 1)), errorHandling, cancellationToken))
                         {
                             i--;
                             placementFailures++;
@@ -166,7 +163,8 @@ public partial class FurniPlacementController(
             floorItemPlacement.ReportPlacementFailure(location);
         }
         await interval;
-
+        var tile = room.Heightmap[location];
+        tile.Set_Blocked(true);
         return result is PlaceFloorItemTask.Result.Success;
     }
 

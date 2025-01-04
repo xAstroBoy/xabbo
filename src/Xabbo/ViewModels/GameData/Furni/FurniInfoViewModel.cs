@@ -7,11 +7,13 @@ public class FurniInfoViewModel(FurniInfo info)
 {
     public FurniInfo Info { get; } = info;
 
-    public string Name => Info.Name;
-    public string Identifier => Info.Identifier;
+    public string Identifier => Info.Name.IsNotNullOrEmptyOrWhiteSpace() ? Info.Name : Info.ClassName;
     public ItemType Type => Info.Type;
-    public int Kind => Info.Kind;
-    public string Line => Info.Line;
-    public string Category => Info.CategoryName;
-    public string TypeKind => $"{Type}/{Kind}";
+    public long TypeID => Info.TypeID;
+    public string TypeKind => $"{Type}/{TypeID}";
+    public string Description => Info.Description;
+
+    public string ClassName => Info.ClassName;
+    
+
 }

@@ -3,7 +3,7 @@ using Xabbo.Core.Messages.Outgoing;
 
 namespace Xabbo.Command.Modules;
 
-[CommandModule(SupportedClients = ClientType.Modern)]
+[CommandModule]
 public sealed class InfoCommands : CommandModule
 {
     public InfoCommands() { }
@@ -18,7 +18,7 @@ public sealed class InfoCommands : CommandModule
         {
             name = name[3..].Trim();
 
-            if (Id.TryParse(name, out Id id))
+            if (int.TryParse(name, out int id))
             {
                 profile = await Ext.RequestAsync(new GetProfileMsg(id, true), block: false, timeout: 3000);
             }
@@ -45,7 +45,7 @@ public sealed class InfoCommands : CommandModule
         if (args.Length < 1)
             throw new InvalidArgsException();
 
-        if (args.Length < 1 || !Id.TryParse(args[0], out Id id))
+        if (args.Length < 1 || !int.TryParse(args[0], out int id))
         {
             ShowMessage($"Invalid ID: '{args[0]}'.");
             return;

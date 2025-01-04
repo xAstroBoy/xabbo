@@ -1,8 +1,9 @@
-﻿using Xabbo.Messages.Flash;
+﻿
 using Xabbo.Extension;
 using Xabbo.Core.Messages.Outgoing;
 using Xabbo.Services.Abstractions;
 using Xabbo.Configuration;
+using Xabbo.Messages.Nitro;
 
 namespace Xabbo.Components;
 
@@ -12,7 +13,7 @@ public partial class AntiTurnComponent(
     IConfigProvider<AppConfig> config
     ) : Component(extension)
 {
-    private long _lastSelectedUser = -1;
+    private int _lastSelectedUser = -1;
     private int _lastLookAtX, _lastLookAtY;
     private DateTime _lastSelection = DateTime.MinValue;
 
@@ -30,16 +31,6 @@ public partial class AntiTurnComponent(
 
         bool block = true;
 
-        if (Client is ClientType.Shockwave)
-        {
-            if (Enabled && TurnOnReselect && (DateTime.Now - _lastSelection).TotalSeconds < ReselectThreshold)
-            {
-                if (_lastLookAtX == look.X && _lastLookAtY == look.Y)
-                    block = false;
-            }
-
-            _lastSelection = DateTime.Now;
-        }
 
         if (block) e.Block();
 
@@ -47,11 +38,10 @@ public partial class AntiTurnComponent(
         _lastLookAtY = look.Y;
     }
 
-    [Intercept(~ClientType.Shockwave)]
-    [InterceptOut(nameof(Out.GetSelectedBadges))]
+    [InterceptOut(nameof(Out.User_Badges))]
     private void OnRequestWearingBadges(Intercept e)
     {
-        Id userId = e.Packet.Read<Id>();
+        int userId = e.Packet.Read<int>();
 
         if (Enabled && TurnOnReselect && (DateTime.Now - _lastSelection).TotalSeconds < ReselectThreshold)
         {

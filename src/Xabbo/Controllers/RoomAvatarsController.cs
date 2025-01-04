@@ -1,9 +1,10 @@
-using ReactiveUI;
+﻿using ReactiveUI;
 using Xabbo.Core;
 using Xabbo.Core.Game;
 using Xabbo.Core.Messages.Incoming;
 using Xabbo.Extension;
-using Xabbo.Messages.Flash;
+using Xabbo.Messages.Nitro;
+
 
 namespace Xabbo.Controllers;
 

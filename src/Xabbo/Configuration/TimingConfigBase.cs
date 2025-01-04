@@ -1,4 +1,4 @@
-using ReactiveUI;
+﻿using ReactiveUI;
 
 namespace Xabbo.Configuration;
 
@@ -10,4 +10,5 @@ public class TimingConfigBase : ReactiveObject
     [Reactive] public int FurniToggleInterval { get; set; } = 150;
     [Reactive] public int FurniMoveInterval { get; set; } = 300;
     [Reactive] public int ModerationInterval { get; set; } = 500;
+    [Reactive] public int TradeOfferInterval { get; set; } = 200;
 }

@@ -1,11 +1,11 @@
 ﻿using System.Text.RegularExpressions;
-
-using Xabbo.Messages.Flash;
 using Xabbo.Core.GameData;
+using Xabbo.Custom;
+using Xabbo.Messages.Nitro;
 
 namespace Xabbo.Command.Modules;
 
-[CommandModule(SupportedClients = ~ClientType.Shockwave)]
+[CommandModule]
 public sealed partial class EffectCommands : CommandModule
 {
     [GeneratedRegex(@"^fx_(\d+)$")]
@@ -15,7 +15,7 @@ public sealed partial class EffectCommands : CommandModule
 
     private bool _isReady, _isFaulted;
 
-    private readonly Dictionary<int, string> _effectNames = new();
+    private readonly Dictionary<int, EffectInfo> _effectNames = new();
 
     public EffectCommands(IGameDataManager gameDataManager)
     {
@@ -37,16 +37,9 @@ public sealed partial class EffectCommands : CommandModule
 
     private void OnGameDataLoaded()
     {
-        var texts = _gameDataManager.Texts ?? throw new Exception("Failed to load game data.");
-
-        foreach (var (key, value) in texts)
+        foreach(var effect in EffectLibrary.GetInstance().EffectList)
         {
-            var match = RegexEffect().Match(key);
-            if (match.Success)
-            {
-                int effectId = int.Parse(match.Groups[1].Value);
-                _effectNames[effectId] = value;
-            }
+            _effectNames[effect.Id] = effect;
         }
 
         _isReady = true;
@@ -57,9 +50,9 @@ public sealed partial class EffectCommands : CommandModule
         searchText = searchText.ToLower();
 
         return _effectNames
-            .Where(x => x.Value.ToLower().Contains(searchText))
-            .OrderBy(x => Math.Abs(x.Value.Length - searchText.Length))
-            .Select(x => (x.Key, x.Value))
+            .Where(x => x.Value.Name.ToLower().Contains(searchText))
+            .OrderBy(x => Math.Abs(x.Value.Name.Length - searchText.Length))
+            .Select(x => (x.Key, x.Value.Name))
             .ToList();
     }
 
@@ -80,7 +73,7 @@ public sealed partial class EffectCommands : CommandModule
 
         if (string.IsNullOrWhiteSpace(searchText))
         {
-            Ext.Send(Out.AvatarEffectSelected, -1);
+            Ext.Send(Out.Chat, ":eff 0", 0);
             return;
         }
 
@@ -88,8 +81,7 @@ public sealed partial class EffectCommands : CommandModule
         if (matches.Count > 0)
         {
             if (activate)
-                Ext.Send(Out.AvatarEffectActivated, matches[0].Id);
-            Ext.Send(Out.AvatarEffectSelected, matches[0].Id);
+                Ext.Send(Out.Chat, $":eff {matches[0].Id}", 0);
         }
         else
         {
@@ -114,8 +106,7 @@ public sealed partial class EffectCommands : CommandModule
     [Command("dropfx")]
     public Task OnDropEffect(CommandArgs args)
     {
-        Ext.Send(Out.Chat, ":yyxxabxa", 0, -1);
-        Ext.Send(Out.Shout, ":yyxxabxa", 0);
+        Ext.Send(Out.Chat, ":eff 0", 0);
         return Task.CompletedTask;
     }
 }

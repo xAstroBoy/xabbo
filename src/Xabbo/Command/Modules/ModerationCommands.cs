@@ -1,9 +1,10 @@
 ﻿using System.Collections.Concurrent;
-using Xabbo.Messages.Flash;
+
 using Xabbo.Core;
 using Xabbo.Core.Game;
 using Xabbo.Core.Events;
 using Xabbo.Core.Messages.Outgoing;
+using Xabbo.Messages.Nitro;
 
 namespace Xabbo.Command.Modules;
 
@@ -43,10 +44,10 @@ public sealed class ModerationCommands(RoomManager roomManager) : CommandModule
             Ext.Send(new BanUserMsg(user, room.Id, duration));
     }
 
-    private void UnbanUser(Id userId)
+    private void UnbanUser(int userId)
     {
         if (_roomManager.EnsureInRoom(out var room))
-            Ext.Send(Out.UnbanUserFromRoom, userId, room.Id);
+            Ext.Send(Out.Room_Ban_Remove, userId, room.Id);
     }
 
     private void RoomManager_Left()
@@ -78,7 +79,7 @@ public sealed class ModerationCommands(RoomManager roomManager) : CommandModule
         });
     }
 
-    [Command("mute", SupportedClients = ClientType.Modern)]
+    [Command("mute", SupportedClients = ClientType.Nitro)]
     public Task HandleMuteCommand(CommandArgs args)
     {
         if (args.Length < 2)
@@ -139,7 +140,7 @@ public sealed class ModerationCommands(RoomManager roomManager) : CommandModule
         return Task.CompletedTask;
     }
 
-    [Command("unmute", SupportedClients = ClientType.Modern)]
+    [Command("unmute", SupportedClients = ClientType.Nitro)]
     public Task HandleUnmuteCommand(CommandArgs args)
     {
         if (args.Length < 1) return Task.CompletedTask;

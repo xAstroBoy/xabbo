@@ -1,4 +1,4 @@
-using Xabbo.Core;
+﻿using Xabbo.Core;
 using Xabbo.Core.Game;
 using Xabbo.Services.Abstractions;
 

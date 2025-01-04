@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Reactive;
 using System.Reactive.Linq;
 using DynamicData;
@@ -9,9 +9,11 @@ using FluentAvalonia.UI.Controls;
 using HanumanInstitute.MvvmDialogs;
 
 using Xabbo.Extension;
-using Xabbo.Messages.Flash;
+
 using Xabbo.Core;
 using Xabbo.Core.Messages.Outgoing;
+using Xabbo.Messages;
+using Xabbo.Messages.Nitro;
 using Xabbo.Services.Abstractions;
 using Xabbo.Models;
 using Xabbo.Utility;
@@ -88,7 +90,7 @@ public sealed class WardrobePageViewModel : PageViewModel
             ImportWardrobeAsync,
             _gameState
                 .WhenAnyValue(x => x.Session)
-                .Select(session => session.Is(ClientType.Modern))
+                .Select(session => session.Is(ClientType.Nitro))
                 .ObserveOn(RxApp.MainThreadScheduler)
         );
 
@@ -97,10 +99,8 @@ public sealed class WardrobePageViewModel : PageViewModel
 
     private Func<OutfitViewModel, bool> CreateFilter(Session session) => (vm) => session.Client.Type switch
     {
-        ClientType.Origins => vm.IsOrigins,
-        ClientType.Flash or ClientType.Unity => !vm.IsOrigins,
-        _ => false
-    };
+        _ => false,
+     };
 
     public void AddFigure(Gender gender, string figure)
     {
@@ -108,7 +108,6 @@ public sealed class WardrobePageViewModel : PageViewModel
         {
             Gender = gender.ToClientString(),
             FigureString = figure,
-            IsOrigins = _gameState.Session.Is(ClientType.Origins)
         };
 
         if (_repository.Add(figureModel))
@@ -117,13 +116,18 @@ public sealed class WardrobePageViewModel : PageViewModel
             UpdateModernFigure(vm);
             _cache.AddOrUpdate(vm);
         }
+        else
+        {
+            OutfitViewModel vm = new(figureModel);
+            UpdateModernFigure(vm);
+        }
     }
 
     private void AddCurrentFigure()
     {
         if (_gameState.Profile.UserData is { } userData)
         {
-            AddFigure(userData.Gender, userData.Figure);
+            AddFigure(Gender.Male, userData.Figure);
         }
     }
 
@@ -137,15 +141,12 @@ public sealed class WardrobePageViewModel : PageViewModel
 
     private async Task ImportWardrobeAsync()
     {
-        if (!_ext.Session.Is(ClientType.Modern))
-            return;
-
         try
         {
-            _ext.Send(Out.GetWardrobe);
-            var packet = await _ext.ReceiveAsync(In.Wardrobe, 3000);
+            _ext.Send(Out.Get_Wardrobe);
+            var packet = await _ext.ReceiveAsync(In.User_Wardrobe_Page.ToHeader(), 3000);
             int state = packet.Read<int>();
-            int n = packet.Read<Length>();
+            int n = packet.Read<int>();
             for (int i = 0; i < n; i++)
             {
                 int slot = packet.Read<int>();
@@ -154,7 +155,7 @@ public sealed class WardrobePageViewModel : PageViewModel
                 AddFigure(gender, figureString);
             }
         }
-        catch
+        catch(Exception e)
         {
             await _dialog.ShowAsync("Error", "Failed to retrieve wardrobe.");
         }
@@ -178,8 +179,7 @@ public sealed class WardrobePageViewModel : PageViewModel
 
     private void UpdateModernFigure(OutfitViewModel vm)
     {
-        if (vm.IsOrigins &&
-            vm.ModernFigure is null &&
+        if (vm.ModernFigure is null &&
             _figureConverter.TryConvertToModern(vm.Figure, out Figure? figure))
         {
             vm.ModernFigure = figure.ToString();

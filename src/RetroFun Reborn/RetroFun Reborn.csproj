@@ -1,0 +1,74 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <RootNamespace>RetroFun_Reborn</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\Fonts\IBMPlexMono-Bold.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\IBMPlexMono-BoldItalic.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\IBMPlexMono-ExtraLight.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\IBMPlexMono-ExtraLightItalic.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\IBMPlexMono-Italic.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\IBMPlexMono-Light.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\IBMPlexMono-LightItalic.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\IBMPlexMono-Medium.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\IBMPlexMono-MediumItalic.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\IBMPlexMono-Regular.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\IBMPlexMono-SemiBold.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\IBMPlexMono-SemiBoldItalic.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\IBMPlexMono-Thin.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\IBMPlexMono-ThinItalic.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\IBMPlexSans-Bold.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\IBMPlexSans-BoldItalic.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\IBMPlexSans-ExtraLight.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\IBMPlexSans-ExtraLightItalic.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\IBMPlexSans-Italic.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\IBMPlexSans-Light.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\IBMPlexSans-LightItalic.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\IBMPlexSans-Medium.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\IBMPlexSans-MediumItalic.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\IBMPlexSans-Regular.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\IBMPlexSans-SemiBold.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\IBMPlexSans-SemiBoldItalic.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\IBMPlexSans-Thin.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\IBMPlexSans-ThinItalic.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\NotoEmoji-Regular.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\OFL.txt" />
+    <AvaloniaResource Include="Assets\Icon\xabbo-skull-64.png" />
+    <AvaloniaResource Include="Assets\Icon\xabbo.png" />
+    <AvaloniaResource Include="Assets\Images\ambassador.png" />
+    <AvaloniaResource Include="Assets\Images\Avatar\body-0.png" />
+    <AvaloniaResource Include="Assets\Images\Avatar\body-1.png" />
+    <AvaloniaResource Include="Assets\Images\Avatar\body-2.png" />
+    <AvaloniaResource Include="Assets\Images\Avatar\body-3.png" />
+    <AvaloniaResource Include="Assets\Images\Avatar\body-4.png" />
+    <AvaloniaResource Include="Assets\Images\Avatar\body-5.png" />
+    <AvaloniaResource Include="Assets\Images\Avatar\body-6.png" />
+    <AvaloniaResource Include="Assets\Images\Avatar\body-7.png" />
+    <AvaloniaResource Include="Assets\Images\Avatar\head-0.png" />
+    <AvaloniaResource Include="Assets\Images\Avatar\head-1.png" />
+    <AvaloniaResource Include="Assets\Images\Avatar\head-2.png" />
+    <AvaloniaResource Include="Assets\Images\Avatar\head-3.png" />
+    <AvaloniaResource Include="Assets\Images\Avatar\head-4.png" />
+    <AvaloniaResource Include="Assets\Images\Avatar\head-5.png" />
+    <AvaloniaResource Include="Assets\Images\Avatar\head-6.png" />
+    <AvaloniaResource Include="Assets\Images\Avatar\head-7.png" />
+    <AvaloniaResource Include="Assets\Images\idle.png" />
+    <AvaloniaResource Include="Assets\Images\staff.png" />
+    <AvaloniaResource Include="Assets\Images\trading.png" />
+    <AvaloniaResource Include="Assets\Images\typing.png" />
+    <AvaloniaResource Include="Assets\xabbo-skull-128.png" />
+    <AvaloniaResource Include="Assets\xabbo-skull-64.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Xabbo\Xabbo.csproj" />
+  </ItemGroup>
+
+</Project>

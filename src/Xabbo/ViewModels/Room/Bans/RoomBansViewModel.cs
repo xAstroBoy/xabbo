@@ -29,7 +29,7 @@ public class RoomBansViewModel : ViewModelBase
     private readonly RoomManager _roomManager;
     private readonly RoomModerationController _moderation;
 
-    private readonly SourceCache<RoomBanViewModel, Id> _banCache = new(x => x.Id);
+    private readonly SourceCache<RoomBanViewModel, int> _banCache = new(x => x.Id);
     private readonly ReadOnlyObservableCollection<RoomBanViewModel> _bans;
     public ReadOnlyObservableCollection<RoomBanViewModel> Bans => _bans;
 
@@ -142,7 +142,7 @@ public class RoomBansViewModel : ViewModelBase
 
     private async Task LoadBansAsync()
     {
-        if (_roomManager.Room is not { Id: Id currentRoomId })
+        if (_roomManager.Room is not { Id: int currentRoomId })
             return;
 
         try

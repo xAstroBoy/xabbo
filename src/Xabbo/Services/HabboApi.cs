@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 
 using Xabbo.Core;
@@ -9,22 +9,22 @@ namespace Xabbo.Services;
 
 public sealed class HabboApi : IHabboApi
 {
-    private readonly HttpClient _http = new()
-    {
-        DefaultRequestHeaders = {
-            { "User-Agent", "xabbo" }
-        }
-    };
+    private readonly HttpClient _http;
 
-    private async Task<T> GetRequiredDataAsync<T>(Hotel hotel, string path, CancellationToken cancellationToken = default)
+    public HabboApi()
     {
-        if (!path.StartsWith('/'))
-            throw new ArgumentException("Path must start with '/'.", nameof(path));
+        // Utilize the shared HttpClient from HttpClientFactory
+        _http = HttpClientFactory.Instance;
+    }
+
+
+    private async Task<T> GetRequiredDataAsync<T>(string url, CancellationToken cancellationToken = default)
+    {
 
         var typeInfo = JsonWebContext.Default.GetTypeInfo(typeof(T)) as JsonTypeInfo<T>
             ?? throw new Exception($"Failed to get type info for '{typeof(T)}'.");
 
-        var res = await _http.GetAsync($"https://{hotel.WebHost}{path}", cancellationToken);
+        var res = await _http.GetAsync(url, cancellationToken);
         res.EnsureSuccessStatusCode();
 
         return await JsonSerializer.DeserializeAsync<T>(
@@ -32,22 +32,8 @@ public sealed class HabboApi : IHabboApi
             ?? throw new Exception($"Failed to deserialize {typeInfo.Type.Name}.");
     }
 
-    public Task<Web.Dto.MarketplaceItemStats> FetchMarketplaceItemStats(Hotel hotel, ItemType type, string identifier, CancellationToken cancellationToken = default)
+    public Task<string> FetchPhotoDataAsync(string Url, CancellationToken cancellationToken = default)
     {
-        string? typeString = type switch
-        {
-            ItemType.Floor => "roomItem",
-            ItemType.Wall => "wallItem",
-            _ => throw new Exception($"Invalid item type: {type}.")
-        };
-
-        return GetRequiredDataAsync<Web.Dto.MarketplaceItemStats>(
-            hotel, $"/api/public/marketplace/stats/{typeString}/{identifier}", cancellationToken);
-    }
-
-    public Task<Web.Dto.PhotoData> FetchPhotoDataAsync(Hotel hotel, string photoId, CancellationToken cancellationToken = default)
-    {
-        return GetRequiredDataAsync<Web.Dto.PhotoData>(
-            hotel, $"/photodata/public/furni/{photoId}", cancellationToken);
+        return Task.FromResult(Url);
     }
 }

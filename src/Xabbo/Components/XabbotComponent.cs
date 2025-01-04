@@ -17,7 +17,7 @@ public partial class XabbotComponent : Component
     private readonly RoomManager _roomManager;
     private Point _currentLocation = (0, 0);
 
-    public long UserId { get; private set; } = 2_000_000_000;
+    public int UserId { get; private set; } = 2_000_000_000;
     public int UserIndex { get; private set; } = 2_000_000_000;
 
     public XabbotComponent(
@@ -61,21 +61,11 @@ public partial class XabbotComponent : Component
 
     private void OnEnteredRoom(RoomEventArgs e)
     {
-        Avatar avatar = Ext.Session.Client.Type switch
-        {
-            ClientType.Shockwave => new User(UserId, UserIndex) { Gender = Gender.Male },
-            not ClientType.Shockwave => new Bot(AvatarType.PublicBot, UserId, UserIndex)
-        };
-
+        Avatar avatar = new Bot(AvatarType.PublicBot, UserId, UserIndex);
         avatar.Name = "xabbo";
         avatar.Motto = "enhanced habbo";
         avatar.Location = new Tile(0, 0, -100);
-        avatar.Figure = Ext.Session.Client.Type switch
-        {
-            ClientType.Shockwave => "1500225504295101800127534",
-            not ClientType.Shockwave => "hr-100.hd-185-14.ch-805-71.lg-281-75.sh-305-80.ea-1406.cc-260-80"
-        };
-
+        avatar.Figure = "hr-100.hd-185-14.ch-805-71.lg-281-75.sh-305-80.ea-1406.cc-260-80";
         _logger.LogTrace("Injecting xabbo avatar into room.");
         _currentLocation = avatar.Location;
         Ext.Send(new AvatarsAddedMsg { avatar });
@@ -111,17 +101,6 @@ public partial class XabbotComponent : Component
             }
         });
 
-        if (Session.Is(ClientType.Origins))
-        {
-            // Required on Origins to show the chat bubble at the correct location consistently.
-            Task.Run(async () => {
-                await Task.Delay(333);
-                Ext.Send(new AvatarTalkMsg(message, UserIndex, 30));
-            });
-        }
-        else
-        {
-            Ext.Send(new AvatarTalkMsg(message, UserIndex, 30));
-        }
+        Ext.Send(new AvatarTalkMsg(message, UserIndex, 30));
     }
 }

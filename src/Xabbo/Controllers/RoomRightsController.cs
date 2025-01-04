@@ -1,10 +1,11 @@
-using System.Reactive.Disposables;
+﻿using System.Reactive.Disposables;
 using Microsoft.Extensions.Logging;
 using Xabbo.Core;
 using Xabbo.Core.Events;
 using Xabbo.Core.Game;
 using Xabbo.Extension;
-using Xabbo.Messages.Flash;
+using Xabbo.Messages.Nitro;
+
 
 namespace Xabbo.Controllers;
 
@@ -58,10 +59,7 @@ public partial class RoomRightsController : ControllerBase
             _roomManager.RightsLevel is RightsLevel.None)
         {
             _logger.LogDebug("Giving client-side rights.");
-            if (Session.Is(ClientType.Modern))
-                Send(In.YouAreController, room.Id, 4);
-            else
-                Send(In.YouAreOwner);
+            Send(In.User_Permissions, 100, 100, true);
         }
     }
 
@@ -72,7 +70,8 @@ public partial class RoomRightsController : ControllerBase
             if (_roomManager.RightsLevel is RightsLevel.None)
             {
                 _logger.LogDebug("Removing client-side rights.");
-                Send(In.YouAreNotController, room.Id);
+                Send(In.User_Permissions, 1, 2, false);
+
             }
         }
     }

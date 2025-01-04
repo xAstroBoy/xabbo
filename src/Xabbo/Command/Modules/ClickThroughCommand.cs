@@ -1,8 +1,8 @@
-using Xabbo.Components;
+﻿using Xabbo.Components;
 
 namespace Xabbo.Command.Modules;
 
-[CommandModule(SupportedClients = ~ClientType.Shockwave)]
+[CommandModule]
 public sealed class ClickThroughCommand(ClickThroughComponent clickThrough) : CommandModule
 {
     private readonly ClickThroughComponent _clickThrough = clickThrough;

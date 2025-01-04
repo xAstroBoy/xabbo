@@ -2,6 +2,8 @@
 using FluentIcons.Avalonia.Fluent;
 
 using IconSource = FluentAvalonia.UI.Controls.IconSource;
+using ReactiveUI;
+using System.Reactive;
 
 namespace Xabbo.ViewModels;
 
@@ -18,4 +20,10 @@ public class GameDataPageViewModel(
     public FurniDataViewModel FurniData { get; } = furniData;
     public ExternalTextsViewModel Texts { get; } = texts;
     public ExternalVariablesViewModel Variables { get; } = variables;
+
+    public ReactiveCommand<Unit, Unit> AddFurniCommand { get; }
+
+
+
+
 }

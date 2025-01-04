@@ -1,12 +1,12 @@
 ﻿using Microsoft.Extensions.Configuration;
 using ReactiveUI;
 
-using Xabbo.Messages.Flash;
+
 using Xabbo.Extension;
+using Xabbo.Messages.Nitro;
 
 namespace Xabbo.Components;
 
-[Intercept(~ClientType.Shockwave)]
 public partial class ClickThroughComponent : Component
 {
     [Reactive] public bool Enabled { get; set; }
@@ -22,20 +22,23 @@ public partial class ClickThroughComponent : Component
     {
         base.OnConnected(e);
 
-        IsAvailable = Client is not ClientType.Shockwave;
+        IsAvailable = true;
     }
+
+    
+
 
     // [RequiredIn(nameof(In.GameYouArePlayer))]
     protected void OnIsActiveChanged(bool isActive)
     {
-        Ext.Send(In.YouArePlayingGame, isActive);
+        Ext.Send(In.Playing_Game, isActive);
     }
 
-    [InterceptIn(nameof(In.RoomEntryInfo))]
+    [InterceptIn(nameof(In.Room_Enter))]
     // [RequiredIn(nameof(In.GameYouArePlayer))]
     private void OnEnterRoom(Intercept e)
     {
         if (Enabled)
-            Ext.Send(In.YouArePlayingGame, true);
+            Ext.Send(In.Playing_Game, true);
     }
 }

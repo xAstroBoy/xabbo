@@ -1,4 +1,4 @@
-using ReactiveUI;
+﻿using ReactiveUI;
 using Xabbo.Abstractions;
 using Xabbo.Core;
 using Xabbo.Core.GameData;
@@ -8,62 +8,77 @@ namespace Xabbo.ViewModels;
 
 public abstract class ItemViewModelBase : ViewModelBase
 {
-    protected readonly FurniInfo? _info;
+    public FurniInfo FurniInfo { get; private set; }
 
     public IItem Item { get; private set; }
 
-    public long Id => Item.Id;
+    public int Id => Item.Id;
     public ItemType Type => Item.Type;
-    public int Kind => _info?.Kind ?? 0;
-    public string Identifier => Item.Identifier ?? _info?.Identifier ?? "?";
-    public string? Variant { get; }
+    public long TypeID => Item.TypeID;
 
-    public string Name { get; }
-    public string? Description { get; }
+    public string Name { get; private set; }
+
+    public string Description { get; private set; }
 
     [Reactive] public bool IsHidden { get; set; }
 
-    public IItemIcon? Icon { get; }
+    public IItemIcon? Icon { get; set; }
 
     public ItemViewModelBase(IItem item)
     {
         Item = item;
 
-        if (Extensions.IsInitialized && item.TryGetInfo(out _info))
+        if (item is IFloorItem or IWallItem)
         {
-            if (item.TryGetVariant(out string? variant))
-                Variant = variant;
-
-            if (item.TryGetName(out string? name))
-                Name = name;
-            else
-                Name = _info.Identifier;
-
-            if (item.TryGetDescription(out string? desc) && !desc.EndsWith("desc"))
-                Description = desc;
-
-            // Hard-coded fix for Origins.
-            FurniInfo? iconInfo = _info;
-            if (iconInfo.Identifier == "post.it" &&
-                !Extensions.TryGetInfo(new WallItem { Identifier = "post_it" }, out iconInfo))
-            {
-                iconInfo = _info;
-            }
-
-            if (iconInfo.Revision > 0)
-            {
-                Icon = new ItemIcon(iconInfo.Revision, iconInfo.Identifier, variant);
-            }
+            MakeIcon(item);
         }
         else
         {
-            Name = item.Identifier ?? "?";
+            MakeIconFromType(item);
         }
-
-        if (item is IFloorItem { Data.IsLimitedRare: true } ltd)
-            Name += $" #{ltd.Data.UniqueSerialNumber}";
     }
 
+    public void MakeIcon(IItem item)
+    {
+        var info = item.GetInfo();
+        if (info != null)
+        {
+            FurniInfo = info;
+            Name = FurniInfo.Name.IsNotNullOrEmptyOrWhiteSpace() ? FurniInfo.Name : FurniInfo.ClassName;
+            Description = FurniInfo.Description.IsNotNullOrEmptyOrWhiteSpace() ? FurniInfo.Description : "No description available.";
+            Icon = new ItemIcon(info.ClassName);
+            if (item is IFloorItem { Data.IsLimitedRare: true } ltd)
+                Name += $" #{ltd.Data.UniqueSerialNumber}";
+        }
+        else
+        {
+            Name = $"Unknown {item.TypeID}";
+            Description = "Unknown item type";
+            Icon = new ItemIcon(null);
+        }
+
+    }
+
+
+    public void MakeIconFromType(IItem item)
+    {
+        var info = item.GetByType();
+        if (info != null)
+        {
+            FurniInfo = info;
+            Name = FurniInfo.Name.IsNotNullOrEmptyOrWhiteSpace() ? FurniInfo.Name : FurniInfo.ClassName;
+            Description = FurniInfo.Description.IsNotNullOrEmptyOrWhiteSpace() ? FurniInfo.Description : "No description available.";
+            Icon = new ItemIcon(info.ClassName);
+            if (item is IFloorItem { Data.IsLimitedRare: true } ltd)
+                Name += $" #{ltd.Data.UniqueSerialNumber}";
+        }
+        else
+        {
+            Name = $"Unknown {item.TypeID}";
+            Description = "Unknown item type";
+            Icon = new ItemIcon(null);
+        }
+    }
     public void UpdateItem(IItem item)
     {
         Item = item;

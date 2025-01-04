@@ -1,13 +1,14 @@
-using ReactiveUI;
+﻿using ReactiveUI;
 
 using Xabbo.Messages;
-using Xabbo.Messages.Flash;
+
 using Xabbo.Extension;
 using Xabbo.Core;
 using Xabbo.Core.Game;
 using Xabbo.Core.Messages.Outgoing;
 using Xabbo.Services.Abstractions;
 using Xabbo.Configuration;
+using Xabbo.Messages.Nitro;
 
 namespace Xabbo.Components;
 
@@ -52,21 +53,11 @@ public partial class AntiIdleComponent : Component
 
     protected void OnActiveChanged() => SendAntiIdlePacket();
 
-    [Intercept(ClientType.Modern)]
-    [InterceptOut(nameof(Out.LatencyPingRequest))]
+    [InterceptOut(nameof(Out.Latency))]
     protected void HandleLatencyPingRequest(Intercept e)
     {
         _pingCount = e.Packet.Read<int>();
         SendAntiIdlePacket();
-    }
-
-    [Intercept(ClientType.Origins)]
-    [InterceptIn(nameof(In.Ping))]
-    protected void HandlePing(Intercept e)
-    {
-        _pingCount++;
-        if (_pingCount % 5 == 0)
-            SendAntiIdlePacket();
     }
 
     private void SendAntiIdlePacket()
@@ -75,35 +66,27 @@ public partial class AntiIdleComponent : Component
 
         IMessage? antiIdleMsg = null;
 
-        if (Ext.Session.Is(ClientType.Origins))
+        if (_profileManager.UserData is not null &&
+            _roomManager.Room is not null &&
+            _roomManager.Room.TryGetUserById(_profileManager.UserData.Id, out IUser? self))
         {
             if (Settings.General.AntiIdle)
-                antiIdleMsg = new WalkMsg(0, 0);
+            {
+                if (self.Dance != 0 && Settings.General.AntiIdle)
+                    antiIdleMsg = new WalkMsg(0, 0);
+                else if (Settings.General.AntiIdle)
+                    antiIdleMsg = new ActionMsg(AvatarAction.None);
+            }
+            else if (Settings.General.AntiIdleOut)
+            {
+                if (self.IsIdle)
+                    antiIdleMsg = new ActionMsg(AvatarAction.Idle);
+            }
         }
         else
         {
-            if (_profileManager.UserData is not null &&
-                _roomManager.Room is not null &&
-                _roomManager.Room.TryGetUserById(_profileManager.UserData.Id, out IUser? self))
-            {
-                if (Settings.General.AntiIdle)
-                {
-                    if (self.Dance != 0 && Settings.General.AntiIdle)
-                        antiIdleMsg = new WalkMsg(0, 0);
-                    else if (Settings.General.AntiIdle)
-                        antiIdleMsg = new ActionMsg(AvatarAction.None);
-                }
-                else if (Settings.General.AntiIdleOut)
-                {
-                    if (self.IsIdle)
-                        antiIdleMsg = new ActionMsg(AvatarAction.Idle);
-                }
-            }
-            else
-            {
-                if (Settings.General.AntiIdle)
-                    antiIdleMsg = new ActionMsg(AvatarAction.None);
-            }
+            if (Settings.General.AntiIdle)
+                antiIdleMsg = new ActionMsg(AvatarAction.None);
         }
 
         if (antiIdleMsg is not null)

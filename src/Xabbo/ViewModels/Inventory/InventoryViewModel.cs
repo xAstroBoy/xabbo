@@ -1,6 +1,7 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Avalonia.Controls.Selection;
@@ -48,7 +49,7 @@ public sealed partial class InventoryViewModel : ControllerBase
     public ReadOnlyObservableCollection<InventoryStackViewModel> Stacks => _stacks;
     [Reactive] public int ItemCount { get; set; }
 
-    private readonly SourceCache<PhotoViewModel, Id> _photoCache = new(x => x.Item.Id);
+    private readonly SourceCache<PhotoViewModel, int> _photoCache = new(x => x.Item.Id);
     private readonly ReadOnlyObservableCollection<PhotoViewModel> _photos;
     public ReadOnlyObservableCollection<PhotoViewModel> Photos => _photos;
 
@@ -263,12 +264,18 @@ public sealed partial class InventoryViewModel : ControllerBase
         _operations.TryCancelOperation(out _);
     }
 
+    // Make it look for .Description as well
+
     private Func<InventoryStackViewModel, bool> CreateFilter(string? filterText)
     {
         return (vm) => {
             if (string.IsNullOrWhiteSpace(filterText))
                 return true;
-            return vm.Name.Contains(FilterText, StringComparison.OrdinalIgnoreCase);
+            // name or desc
+            if(vm.Name.Contains(filterText, StringComparison.OrdinalIgnoreCase)
+               || vm.Description.Equals(filterText, StringComparison.OrdinalIgnoreCase))
+                return true;
+            return false;
         };
     }
 
@@ -280,10 +287,10 @@ public sealed partial class InventoryViewModel : ControllerBase
                     .OfType<IInventoryItem>()
                     .OfKind("external_image_wallitem_poster_small")
                     .Select(TryExtractPhotoId)
-                    .Where(it => !string.IsNullOrWhiteSpace(it.PhotoId))
+                    .Where(it => !string.IsNullOrWhiteSpace(it.PhotoUrl))
                     .Select(it => new PhotoViewModel(
                         it.Item,
-                        new(() => FetchPhotoUrlAsync(Session.Hotel, it.PhotoId!))
+                        new(() => FetchPhotoUrlAsync(it.PhotoUrl!))
                     ))
             );
         });
@@ -344,18 +351,22 @@ public sealed partial class InventoryViewModel : ControllerBase
         });
     }
 
-    private static (IInventoryItem Item, string? PhotoId) TryExtractPhotoId(IInventoryItem item)
+    private static (IInventoryItem Item, string? PhotoUrl) TryExtractPhotoId(IInventoryItem item)
     {
-        string? photoId = null;
+        string? PhotoUrl = null;
 
-        try { photoId = JsonSerializer.Deserialize(item.Data.Value, JsonWebContext.Default.PhotoInfo)?.Id; }
-        catch { }
-
-        return (item, photoId);
+        try { PhotoUrl = JsonSerializer.Deserialize(item.Data.Value, JsonWebContext.Default.PhotoInfo)?.Url; }
+        catch (Exception ex)
+        {
+            // print the exception in visual studio along with the item data value
+            System.Diagnostics.Debug.WriteLine(ex);
+            System.Diagnostics.Debug.WriteLine(item.Data.Value);
+        }
+        return (item, PhotoUrl);
     }
 
-    private async Task<string?> FetchPhotoUrlAsync(Hotel hotel, string photoId)
-        => (await _api.FetchPhotoDataAsync(hotel, photoId)).Url;
+    private async Task<string?> FetchPhotoUrlAsync(string Url)
+        => await Task.FromResult<string?>(Url);
 
     private void OnInventoryCleared()
     {
@@ -502,7 +513,7 @@ public sealed partial class InventoryViewModel : ControllerBase
             return;
         }
 
-        HashSet<Id> offered = [];
+        HashSet<int> offered = [];
         if (_tradeManager.SelfOffer is { } selfOffer)
         {
             foreach (var item in selfOffer)
@@ -538,10 +549,7 @@ public sealed partial class InventoryViewModel : ControllerBase
                     MaxProgress = array.Length;
                     Status = State.Offering;
 
-                    if (Session.Is(ClientType.Origins))
-                        await OfferItemsOriginsAsync(array);
-                    else
-                        await OfferItemsModernAsync(array);
+                    await OfferItemsModernAsync(array);
                 }
                 finally
                 {
@@ -561,16 +569,6 @@ public sealed partial class InventoryViewModel : ControllerBase
         }
     }
 
-    private async Task OfferItemsOriginsAsync(IInventoryItem[] items)
-    {
-        for (int i = 0; i < items.Length; i++)
-        {
-            Progress = i;
-            if (i > 0)
-                await Task.Delay(_config.Value.Timing.Origins.TradeOfferInterval);
-            Send(new OfferTradeItemMsg(items[i]));
-        }
-    }
 
     private Task OfferItemsModernAsync(IInventoryItem[] items)
     {

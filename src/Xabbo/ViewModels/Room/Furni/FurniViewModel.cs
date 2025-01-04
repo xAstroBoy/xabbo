@@ -11,7 +11,7 @@ public class FurniViewModel(IFurni furni) : ItemViewModelBase(furni)
 
     // Common properties
     public string Owner => Furni.OwnerName;
-    public long OwnerId => Furni.OwnerId;
+    public int OwnerId => Furni.OwnerId;
     public int State => Furni.State;
     public bool Hidden => Furni.IsHidden;
 

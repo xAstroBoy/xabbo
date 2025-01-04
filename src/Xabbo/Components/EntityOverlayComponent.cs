@@ -1,12 +1,13 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using ReactiveUI;
 
-using Xabbo.Messages.Flash;
+
 using Xabbo.Extension;
 using Xabbo.Core;
 using Xabbo.Core.Events;
 using Xabbo.Core.Game;
 using Xabbo.Core.Messages.Incoming;
+using Xabbo.Messages.Nitro;
 
 namespace Xabbo.Components;
 

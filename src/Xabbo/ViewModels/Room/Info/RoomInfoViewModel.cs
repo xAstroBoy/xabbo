@@ -43,8 +43,8 @@ public class RoomInfoViewModel : ViewModelBase
             Observable.CombineLatest(
                 _roomManager.WhenAnyValue(x => x.Room),
                 extension.WhenAnyValue(x => x.Session),
-                (room, session) => room is not null && session.Is(ClientType.Modern)
-                    ? $"https://habbo-stories-content.s3.amazonaws.com/navigator-thumbnail/hh{session.Hotel.Identifier}/{room.Id}.png"
+                (room, session) => room is not null && session.Is(ClientType.Nitro)
+                    ? $"https://photo.bsshotel.it/public/roomthumbnail/{room.Id}.png"
                     : null
             )
             .ToProperty(this, x => x.ThumbnailUrl);

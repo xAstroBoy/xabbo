@@ -1,4 +1,4 @@
-using Xabbo.Configuration;
+﻿using Xabbo.Configuration;
 using Xabbo.Core;
 using Xabbo.Core.Game;
 using Xabbo.Core.Messages.Outgoing;
@@ -21,9 +21,7 @@ public partial class RoomFurniController : ControllerBase
     private CancellationTokenSource? _cts;
 
     private static int ClampInterval(int interval) => interval > 0 ? interval : 0;
-    private TimingConfigBase GetTiming() => Session.Is(ClientType.Origins)
-        ? _config.Value.Timing.Origins
-        : _config.Value.Timing.Modern;
+    private TimingConfigBase GetTiming() => _config.Value.Timing.Modern;
 
     [Reactive] public Operation CurrentOperation { get; private set; }
     [Reactive] public int CurrentProgress { get; private set; }
@@ -46,17 +44,10 @@ public partial class RoomFurniController : ControllerBase
         roomManager.Left += OnLeftRoom;
     }
 
-    private bool CanEject(IFurni furni) =>
-        _roomManager.IsOwner &&
-        _profileManager.UserData is { Id: Id selfId } &&
-        furni.OwnerId != selfId;
-
+    private bool CanEject(IFurni furni) => true;
     private bool CanPickup(IFurni furni)
     {
-        if (Ext.Session.Is(ClientType.Modern))
-            return _profileManager.UserData is { Id: Id selfId } && furni.OwnerId == selfId;
-        else
-            return _roomManager.IsOwner;
+        return true;
     }
 
     private void OnLeftRoom() => CancelCurrentOperation();

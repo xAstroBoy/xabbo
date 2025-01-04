@@ -1,7 +1,8 @@
-﻿using Xabbo.Messages.Flash;
+﻿
 using Xabbo.Extension;
 using Xabbo.Core;
 using Xabbo.Core.Game;
+using Xabbo.Messages.Nitro;
 
 namespace Xabbo.Components;
 
@@ -23,7 +24,7 @@ public partial class AntiHandItemComponent(
     [Reactive] public bool ReturnHandItem { get; set; }
     [Reactive] public bool ShouldMaintainDirection { get; set; }
 
-    [InterceptIn(nameof(In.HandItemReceived))]
+    [InterceptIn(nameof(In.Hand_Item_Received))]
     private void HandleHandItemReceived(Intercept e)
     {
         if (ReturnHandItem)
@@ -33,13 +34,13 @@ public partial class AntiHandItemComponent(
                 _roomManager.Room.TryGetUserByIndex(index, out IUser? user))
             {
                 e.Block();
-                Ext.Send(Out.PassCarryItem, user.Id);
+                Ext.Send(Out.Give_Handitem, user.Id);
             }
         }
         else if (DropHandItem)
         {
             e.Block();
-            Ext.Send(Out.DropCarryItem);
+            Ext.Send(Out.Drop_Hand_Item);
         }
 
         if (ShouldMaintainDirection)
@@ -72,9 +73,9 @@ public partial class AntiHandItemComponent(
                     (int invX, int invY) = H.GetMagicVector(dir + 4);
 
                     await Task.Delay(100);
-                    Ext.Send(Out.LookTo, invX, invY);
+                    Ext.Send(Out.Look, invX, invY);
                     await Task.Delay(100);
-                    Ext.Send(Out.LookTo, x, y);
+                    Ext.Send(Out.Look, x, y);
                 }
             }
             finally { semaphore.Release(); }

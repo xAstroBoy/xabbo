@@ -24,7 +24,7 @@ public sealed class InfoPageViewModel : PageViewModel
         Version = Assembly.GetEntryAssembly().GetVersionString();
         XabboCommonVersion = typeof(Xabbo.Client).Assembly.GetVersionString();
         XabboGEarthVersion = typeof(Xabbo.GEarth.GEarthExtension).Assembly.GetVersionString();
-        XabboMessagesVersion = typeof(Xabbo.Messages.Flash.Out).Assembly.GetVersionString();
+        XabboMessagesVersion = typeof(Xabbo.Messages.Nitro.Out).Assembly.GetVersionString();
         XabboCoreVersion = typeof(Xabbo.Core.H).Assembly.GetVersionString();
     }
 }

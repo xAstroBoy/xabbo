@@ -1,6 +1,6 @@
 ﻿using ReactiveUI;
 
-using Xabbo.Messages.Flash;
+
 using Xabbo.Extension;
 using Xabbo.Core;
 using Xabbo.Core.Events;
@@ -9,6 +9,7 @@ using Xabbo.Services.Abstractions;
 using Xabbo.Configuration;
 using Xabbo.Core.Messages.Incoming;
 using Xabbo.Core.Messages.Outgoing;
+using Xabbo.Messages.Nitro;
 
 namespace Xabbo.Components;
 
@@ -72,8 +73,7 @@ public partial class AntiTradeComponent : Component
 
     private void TradeSelf()
     {
-        if (!Session.Is(ClientType.Origins) &&
-            _profileManager.UserData is { Id: Id selfId } &&
+        if (_profileManager.UserData is { Id: int selfId } &&
             _roomManager.EnsureInRoom(out var room) &&
             room.TryGetUserById(selfId, out IUser? self) &&
             CanTrade(room.Data))
@@ -143,11 +143,6 @@ public partial class AntiTradeComponent : Component
         if (Enabled)
         {
             e.Block();
-            if (Session.Is(ClientType.Origins))
-            {
-                if (Config.General.AntiTradeCloseTrade)
-                    Ext.Send(new CloseTradeMsg());
-            }
         }
     }
 
@@ -175,8 +170,7 @@ public partial class AntiTradeComponent : Component
         if (Enabled) e.Block();
     }
 
-    [Intercept(ClientType.Modern)]
-    [InterceptIn(nameof(In.NotificationDialog))]
+    [InterceptIn(nameof(In.Notification_Dialog))]
     protected void HandleNotificationDialog(Intercept e)
     {
         if (e.Packet.Read<string>() == "trade.trading_perk")

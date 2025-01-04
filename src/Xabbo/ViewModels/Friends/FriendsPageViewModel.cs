@@ -12,11 +12,12 @@ using HanumanInstitute.MvvmDialogs;
 using HanumanInstitute.MvvmDialogs.Avalonia.Fluent;
 
 using Xabbo.Interceptor;
-using Xabbo.Messages.Flash;
+
 using Xabbo.Core;
 using Xabbo.Core.Game;
 using Xabbo.Core.Events;
 using Xabbo.Core.Messages.Outgoing;
+using Xabbo.Messages.Nitro;
 using Xabbo.Services.Abstractions;
 
 using Symbol = FluentIcons.Common.Symbol;
@@ -34,7 +35,7 @@ public sealed class FriendsPageViewModel : PageViewModel
     private readonly IInterceptor _interceptor;
     private readonly IFigureConverterService _figureConverter;
     private readonly FriendManager _friendManager;
-    private readonly SourceCache<FriendViewModel, Id> _cache = new(key => key.Id);
+    private readonly SourceCache<FriendViewModel, int> _cache = new(key => key.Id);
 
     private readonly ReadOnlyObservableCollection<FriendViewModel> _friends;
     public ReadOnlyObservableCollection<FriendViewModel> Friends => _friends;
@@ -104,8 +105,7 @@ public sealed class FriendsPageViewModel : PageViewModel
 
     private void UpdateOriginsFigure(FriendViewModel vm)
     {
-        if (vm.IsOrigins &&
-            _figureConverter.TryConvertToModern(vm.Figure, out Figure? figure))
+        if (_figureConverter.TryConvertToModern(vm.Figure, out Figure? figure))
         {
             vm.ModernFigure = figure.ToString();
         }
@@ -120,17 +120,9 @@ public sealed class FriendsPageViewModel : PageViewModel
             Name = friend.Name,
             Motto = friend.Motto,
             Figure = friend.Figure,
-            IsOrigins = _interceptor.Session.Is(ClientType.Origins)
         };
 
-        if (vm.IsOrigins)
-        {
-            UpdateOriginsFigure(vm);
-        }
-        else
-        {
-            vm.ModernFigure = vm.Figure;
-        }
+        vm.ModernFigure = vm.Figure;
 
         return vm;
     }
@@ -151,20 +143,13 @@ public sealed class FriendsPageViewModel : PageViewModel
                 if (vm.Figure != friend.Figure)
                 {
                     vm.Figure = friend.Figure;
-                    if (_interceptor.Session.Is(ClientType.Modern))
-                    {
-                        vm.ModernFigure = vm.Figure;
-                    }
-                    else
-                    {
-                        UpdateOriginsFigure(vm);
-                    }
+                    vm.ModernFigure = vm.Figure;
                 }
             }
         });
     }
 
-    private void RemoveFriend(Id id)
+    private void RemoveFriend(int id)
     {
         _cache.RemoveKey(id);
         this.RaisePropertyChanged(nameof(Header));
@@ -183,7 +168,7 @@ public sealed class FriendsPageViewModel : PageViewModel
 
     private void FollowFriend(FriendViewModel friend)
     {
-        _interceptor.Send(Out.FollowFriend, friend.Id);
+        _interceptor.Send(Out.Follow_Friend, friend.Id);
     }
 
     private async Task RemoveSelectedFriendsAsync()
@@ -208,7 +193,7 @@ public sealed class FriendsPageViewModel : PageViewModel
 
         if (result is ContentDialogResult.Primary)
         {
-            _interceptor.Send(new RemoveFriendsMsg(friendsToRemove.Select(x => x.Id)));
+            _interceptor.Send(new RemoveFriendsMsg((IEnumerable<int>)friendsToRemove.Select(x => x.Id)));
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Xabbo.Core.Messages.Outgoing;
-using Xabbo.Messages.Flash;
+using Xabbo.Messages.Nitro;
+
 
 namespace Xabbo.Command.Modules;
 
@@ -12,15 +13,6 @@ public sealed class UserProfileCommands : CommandModule
     private async Task SetMotto(CommandArgs args)
     {
         string motto = string.Join(" ", args);
-        if (Client is ClientType.Shockwave)
-        {
-            Ext.Send(new UpdateProfileMsg { Motto = motto });
-            await Ext.ReceiveAsync(Xabbo.Messages.Shockwave.In.UPDATEOK);
-            ShowMessage("Motto successfully updated.");
-        }
-        else
-        {
-            Ext.Send(Out.ChangeMotto, motto);
-        }
+        Ext.Send(Out.User_Motto, motto);
     }
 }

@@ -36,8 +36,8 @@ public class ChatPageViewModel : PageViewModel
 
     public ChatLogConfig Config => Settings.Chat.Log;
 
-    private long _currentMessageId;
-    private readonly SourceCache<ChatLogEntryViewModel, long> _cache = new(x => x.EntryId);
+    private int _currentMessageId;
+    private readonly SourceCache<ChatLogEntryViewModel, int> _cache = new(x => x.EntryId);
 
     private readonly ReadOnlyObservableCollection<ChatLogEntryViewModel> _messages;
     public ReadOnlyObservableCollection<ChatLogEntryViewModel> Messages => _messages;
@@ -91,7 +91,7 @@ public class ChatPageViewModel : PageViewModel
         _clipboard.SetText(string.Join("\n", Selection.SelectedItems));
     }
 
-    private long NextEntryId() => Interlocked.Increment(ref _currentMessageId);
+    private int NextEntryId() => Interlocked.Increment(ref _currentMessageId);
 
     private static Func<ChatLogEntryViewModel, bool> CreateFilter(string? filterText)
     {
@@ -189,15 +189,7 @@ public class ChatPageViewModel : PageViewModel
         string? figureString = null;
         if (e.Avatar.Type is not AvatarType.Pet)
         {
-            if (_gameState.Session.Is(ClientType.Origins))
-            {
-                if (_figureConverter.TryConvertToModern(e.Avatar.Figure, out Figure? figure))
-                    figureString = figure.ToString();
-            }
-            else
-            {
-                figureString = e.Avatar.Figure;
-            }
+            figureString = e.Avatar.Figure;
         }
 
         AppendLog(new ChatMessageViewModel

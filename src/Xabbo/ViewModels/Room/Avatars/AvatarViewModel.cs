@@ -11,7 +11,7 @@ public class AvatarViewModel : ViewModelBase
 
     public AvatarType Type => Avatar.Type;
     public int Index => Avatar.Index;
-    public long Id => Avatar.Id;
+    public int Id => Avatar.Id;
     public string Name => Avatar.Name;
     public string Motto => Avatar.Motto;
 
@@ -21,8 +21,6 @@ public class AvatarViewModel : ViewModelBase
 
     [Reactive] public bool IsIdle { get; set; }
     [Reactive] public bool IsTrading { get; set; }
-
-    public bool IsOrigins { get; set; }
     [Reactive] public string? ModernFigure { get; set; }
 
     public bool IsUser => Avatar.Type == AvatarType.User;

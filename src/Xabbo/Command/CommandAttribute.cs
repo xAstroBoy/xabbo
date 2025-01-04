@@ -7,5 +7,5 @@ public sealed class CommandAttribute(string commandName, params string[] aliases
     public IReadOnlyList<string> Aliases { get; } = aliases;
 
     public string Usage { get; set; } = "";
-    public ClientType SupportedClients { get; set; } = ClientType.All;
+    public ClientType SupportedClients { get; set; } = ClientType.Nitro;
 }

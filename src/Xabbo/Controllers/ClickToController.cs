@@ -1,4 +1,4 @@
-﻿using Xabbo.Messages.Flash;
+﻿
 using Xabbo.Extension;
 using Xabbo.Core;
 using Xabbo.Core.Game;
@@ -8,6 +8,7 @@ using Xabbo.Services.Abstractions;
 using Xabbo.Configuration;
 using Xabbo.Controllers;
 using Humanizer;
+using Xabbo.Messages.Nitro;
 
 namespace Xabbo.Components;
 
@@ -47,14 +48,13 @@ public partial class ClickToController(
 
     [Reactive] public bool Bounce { get; set; }
 
-    [Intercept(~ClientType.Shockwave)]
-    [InterceptOut(nameof(Out.GetSelectedBadges))]
+    [InterceptOut(nameof(Out.User_Badges))]
     void OnGetSelectedBadges(Intercept e)
     {
         if (!Enabled || !_roomManager.EnsureInRoom(out var room))
             return;
 
-        HandleClickUser(room.GetAvatarById<IUser>(e.Packet.Read<Id>()));
+        HandleClickUser(room.GetAvatarById<IUser>(e.Packet.Read<int>()));
     }
 
     private bool CanClickTo(IUser user) =>
@@ -68,7 +68,7 @@ public partial class ClickToController(
     [Intercept]
     void HandleLookTo(Intercept e, LookToMsg lookTo)
     {
-        if (!Enabled || Session.Is(ClientType.Modern)) return;
+        if (!Enabled) return;
 
         if (!_roomManager.EnsureInRoom(out IRoom? room))
             return;
@@ -176,7 +176,7 @@ public partial class ClickToController(
                 Send(new BanUserMsg(user.Id, user.Name, room.Id, BanDuration.Hour));
                 if (Config.General.BounceUnbanDelay > 0)
                     await Task.Delay(Config.General.BounceUnbanDelay);
-                Send(Out.UnbanUserFromRoom, user.Id, room.Id);
+                Send(Out.Room_Ban_Remove, user.Id, room.Id);
             });
         }
 
